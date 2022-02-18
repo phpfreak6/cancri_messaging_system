@@ -1,94 +1,111 @@
 <?php
 
-Route::get('/test_message', 'UserController@test_message');
-Route::get('/test', 'CampaignController@test');
+## Facades
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
+## Controllers
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\ListController;
+use App\Http\Controllers\DeliveryController;
+
+## Admin Controllers
+use App\Http\Controllers\admin\UserController as AdminUserController;
+use App\Http\Controllers\admin\CronRequestController as AdminCronRequestController;
+use App\Http\Controllers\admin\BrandController as AdminBrandController;
+use App\Http\Controllers\admin\SettingController as AdminSettingController;
+
+// Route::get('test_message', [UserController::class, 'test_message']);
+// Route::get('test', [CampaignController::class, 'test']);
 
 Route::get('run-command', function () {
-    \Artisan::call('pinpoint:sendsmsmessages');
+    Artisan::call('pinpoint:sendsmsmessages');
     exit("Command executed successfully");
 });
 
+## Admin Routes
+Route::match(['get', 'post'], 'admin', [AdminUserController::class, 'login']);
+Route::get('admin', [AdminUserController::class, 'login']);
+Route::post('admin', [AdminUserController::class, 'checkUserlogin']);
 
-/* ADMIN ROUTES */
+Route::group(['middleware' => 'admin', 'prefix' => 'admin'], function () {
 
-Route::match(['get', 'post'], '/admin', 'admin\UserController@login');
-Route::get('/admin', 'admin\UserController@login');
-Route::post('/admin', 'admin\UserController@checkUserlogin');
-
-Route::group(['middleware' => 'admin'], function () {
     ## Manage Cron Requests
-    Route::get('admin/cron-requests/index', 'admin\CronRequestController@index');
-    Route::post('admin/cron-requests/getCronRequestsDatatable', 'admin\CronRequestController@getCronRequestsDatatable');
+    Route::get('cron-requests/index', [AdminCronRequestController::class, 'index']);
+    Route::post('cron-requests/getCronRequestsDatatable', [AdminCronRequestController::class, 'getCronRequestsDatatable']);
 
     ## Manage Brands
-    Route::get('/admin/brands/index', 'admin\BrandController@index');
-    Route::post('/admin/brands/getBrandsDatatable', 'admin\BrandController@getBrandsDatatable');
-    Route::match(['get', 'post'], '/admin/brands/brand/{brand_id?}', 'admin\BrandController@brand');
-    Route::post('/admin/brands/deleteBrand', 'admin\BrandController@deleteBrand');
-    Route::post('/admin/brands/checkBrandTitleExists', 'admin\BrandController@checkBrandTitleExists');
-    Route::get('/admin/brands/brand-details/{brand_id}', 'admin\BrandController@brandDetails');
+    Route::get('brands/index', [AdminBrandController::class, 'index']);
+    Route::post('brands/getBrandsDatatable', [AdminBrandController::class, 'getBrandsDatatable']);
+    Route::match(['get', 'post'], 'brands/brand/{brand_id?}', [AdminBrandController::class, 'brand']);
+    Route::post('brands/deleteBrand', [AdminBrandController::class, 'deleteBrand']);
+    Route::post('brands/checkBrandTitleExists', [AdminBrandController::class, 'checkBrandTitleExists']);
+    Route::get('brands/brand-details/{brand_id}', [AdminBrandController::class, 'brandDetails']);
 
     ## Manage Users
-    Route::get('/admin/users/index', 'admin\UserController@index');
-    Route::match(['get', 'post'], '/admin/users/user/{user_id?}', 'admin\UserController@user');
-    Route::post('/admin/users/deleteUser', 'admin\UserController@deleteUser');
-    Route::post('/admin/users/getUsersDatatable', 'admin\UserController@getUsersDatatable');
-    Route::post('/admin/users/checkEmailExists', 'admin\UserController@checkEmailExists');
-    Route::get('/admin/dashboard', 'admin\UserController@dashboard');
-    Route::get('/admin/users/logout', 'admin\UserController@logout');
-    Route::match(['get', 'post'], '/admin/users/change_password', 'admin\UserController@changePassword');
+    Route::get('users/index', [AdminUserController::class, 'index']);
+    Route::match(['get', 'post'], 'users/user/{user_id?}', [AdminUserController::class, 'user']);
+    Route::post('users/deleteUser', [AdminUserController::class, 'deleteUser']);
+    Route::post('users/getUsersDatatable', [AdminUserController::class, 'getUsersDatatable']);
+    Route::post('users/checkEmailExists', [AdminUserController::class, 'checkEmailExists']);
+    Route::get('dashboard', [AdminUserController::class, 'dashboard']);
+    Route::get('users/logout', [AdminUserController::class, 'logout']);
+    Route::match(['get', 'post'], 'users/change_password', [AdminUserController::class, 'changePassword']);
 
     ## Manage Settings
-    Route::match(['get', 'post'], '/admin/settings/index', 'admin\SettingController@index');
-
+    Route::match(['get', 'post'], 'settings/index', [AdminSettingController::class, 'index']);
     ## Important Instructions
-    Route::get('/admin/important-instructions', 'admin\SettingController@importantInstructions');
+    Route::get('important-instructions', [AdminSettingController::class, 'importantInstructions']);
 });
 
-/* USER ROUTES */
-
-Route::match(['get', 'post'], '/login', 'UserController@login');
-
+## User Routes
+Route::match(['get', 'post'], [UserController::class, 'login']);
 Route::group(['middleware' => 'user'], function () {
 
-    ## User Routes
-    Route::get('/dashboard', 'UserController@dashboard');
-    Route::get('/', 'UserController@dashboard');
-    Route::get('/logout', 'UserController@logout');
-    Route::match(['get', 'post'], '/change_password', 'UserController@changePassword');
-    Route::post('/users/changeBrand', 'UserController@changeBrand');
+    Route::get('/', [UserController::class, 'dashboard']);
+    Route::get('dashboard', [UserController::class, 'dashboard']);
+    Route::get('logout', [UserController::class, 'logout']);
+    Route::match(['get', 'post'], 'change_password', [UserController::class, 'changePassword']);
+    Route::post('users/changeBrand', [UserController::class, 'changeBrand']);
 
-    ## Manage Lists
-    Route::get('/lists/index', 'ListController@index');
-    Route::post('/lists/getListsDatatable', 'ListController@getListsDatatable');
-    Route::post('/lists/checkListNameExists', 'ListController@checkListNameExists');
-    Route::match(['get', 'post'], '/lists/list/{list_id?}', 'ListController@modify_list');
-    Route::post('/lists/deleteList', 'ListController@deleteList');
-
-    ## Manage List Numbers
-    Route::get('/lists/manage_list_numbers/{encrypted_list_id}', 'ListController@manage_list_numbers');
-    Route::post('/lists/getListNumbersDatatable', 'ListController@getListNumbersDatatable');
-    Route::post('/lists/checkPhoneNumberExistsInList', 'ListController@checkPhoneNumberExistsInList');
-    Route::post('/lists/deleteListPhoneNumber', 'ListController@deleteListPhoneNumber');
-    Route::post('/lists/uploadExcelFile', 'ListController@uploadExcelFile');
-    Route::match(['get', 'post'], '/lists/list_number/{list_hash}/{list_number_hash?}', 'ListController@list_number');
+    Route::group(['prefix' => 'lists'], function () {
+        ## Manage Lists
+        Route::get('index', [ListController::class, 'index']);
+        Route::post('getListsDatatable', [ListController::class, 'getListsDatatable']);
+        Route::post('checkListNameExists', [ListController::class, 'checkListNameExists']);
+        Route::match(['get', 'post'], 'list/{list_id?}', [ListController::class, 'modify_list']);
+        Route::post('deleteList', [ListController::class, 'deleteList']);
+        ## Manage List Numbers
+        Route::get('manage_list_numbers/{encrypted_list_id}', [ListController::class, 'manage_list_numbers']);
+        Route::post('getListNumbersDatatable',  [ListController::class, 'getListNumbersDatatable']);
+        Route::post('checkPhoneNumberExistsInList', [ListController::class, 'checkPhoneNumberExistsInList']);
+        Route::post('deleteListPhoneNumber', [ListController::class, 'deleteListPhoneNumber']);
+        Route::post('uploadExcelFile', [ListController::class, 'uploadExcelFile']);
+        Route::match(['get', 'post'], 'list_number/{list_hash}/{list_number_hash?}', [ListController::class, 'list_number']);
+    });
 
     ## Manage Campaigns
-    Route::get('/campaigns/index', 'CampaignController@index');
-    Route::get('campaigns/duplicate_campaign/{campaign_hash}', 'CampaignController@duplicateCampaign');
-    Route::post('/campaigns/getCampaignsDatatable', 'CampaignController@getCampaignsDatatable');
-    Route::post('/campaigns/deleteCampaign', 'CampaignController@deleteCampaign');
-    Route::post('/campaigns/checkCampaignNameExists', 'CampaignController@checkCampaignNameExists');
-    Route::match(['get', 'post'], '/campaigns/campaign/{campaign_hash?}', 'CampaignController@campaign');
-    Route::match(['get', 'post'], '/campaigns/test_campaign/{campaign_hash}', 'CampaignController@test_campaign');
-    Route::match(['get', 'post'], '/campaigns/live_campaign/{campaign_hash}', 'CampaignController@live_campaign');
+    Route::group(['prefix' => 'campaigns'], function () {
+        Route::get('index', [CampaignController::class, 'index']);
+        Route::get('duplicate_campaign/{campaign_hash}', [CampaignController::class, 'duplicateCampaign']);
+        Route::post('getCampaignsDatatable', [CampaignController::class, 'getCampaignsDatatable']);
+        Route::post('deleteCampaign', [CampaignController::class, 'deleteCampaign']);
+        Route::post('checkCampaignNameExists', [CampaignController::class, 'checkCampaignNameExists']);
+        Route::match(['get', 'post'], 'campaign/{campaign_hash?}', [CampaignController::class, 'campaign']);
+        Route::match(['get', 'post'], 'test_campaign/{campaign_hash}', [CampaignController::class, 'test_campaign']);
+        Route::match(['get', 'post'], 'live_campaign/{campaign_hash}', [CampaignController::class, 'live_campaign']);
+    });
 
     ## Manage Deliveries
-    Route::get('/deliveries/index', 'DeliveryController@index');
-    Route::post('/deliveries/getDeliveriesDatatable', 'DeliveryController@getDeliveriesDatatable');
-    Route::get('/deliveries/delivery_details/{delivery_hash}', 'DeliveryController@delivery_details');
-    Route::post('/deliveries/deleteDelivery', 'DeliveryController@deleteDelivery');
+    Route::group(['prefix' => 'deliveries'], function () {
+        Route::get('index', [DeliveryController::class, 'index']);
+        Route::post('getDeliveriesDatatable',  [DeliveryController::class, 'getDeliveriesDatatable']);
+        // Route::post('getDeliveriesDatatable', 'DeliveryController@getDeliveriesDatatable');
+        Route::get('delivery_details/{delivery_hash}', [DeliveryController::class, 'delivery_details']);
+        // Route::get('delivery_details/{delivery_hash}', 'DeliveryController@delivery_details');
+        Route::post('deleteDelivery', [DeliveryController::class, 'deleteDelivery']);
+    });
 
     ## Manage Delivery Clicks
     Route::get('/delivery_clicks/index', 'DeliveryClickController@index');
