@@ -15,49 +15,43 @@ use App\Models\Messaging;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Exceptions\RestException;
 
-class CampaignController extends Controller
-{
+class CampaignController extends Controller {
 
     protected $MessageModel;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->MessageModel = new Messaging();
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $dataArr['title'] = 'Manage Campaigns';
         return view('frontend/campaigns/index', $dataArr);
     }
 
-    public function getCampaignsDatatable(Request $request)
-    {
+    public function getCampaignsDatatable(Request $request) {
         return datatables()->of(
-            DB::table('campaigns')
-                ->select('campaigns.*')
-                ->where('campaigns.brand_id', '=', Auth::user()->brand_id)
-                ->get()
-        )
-            ->addIndexColumn()
-            ->addColumn('prefix_brand_code_representation', function ($query) {
-                if ($query->prefix_brand_code == 1) {
-                    return '<span class="label label-sm label-success arrowed arrowed-right">Yes</span>';
-                }
-                return '<span class="label label-sm label-danger arrowed arrowed-right">No</span>';
-            })
-            ->addColumn('channel_representation', function ($query) {
-                if ($query->campaign_channel == 'WHATSAPP') {
-                    return '<span style="background-color: #25D366 !important;" class="label label-sm arrowed arrowed-right">Whatsapp</span>';
-                }
-                return '<span style="background-color: #FF9900 !important;" class="label label-sm arrowed arrowed-right">SMS</span>';
-            })
-            ->rawColumns(['prefix_brand_code_representation', 'channel_representation'])
-            ->make(true);
+                                DB::table('campaigns')
+                                ->select('campaigns.*')
+                                ->where('campaigns.brand_id', '=', Auth::user()->brand_id)
+                                ->get())
+                        ->addIndexColumn()
+                        ->addColumn('prefix_brand_code_representation', function ($query) {
+                            if ($query->prefix_brand_code == 1) {
+                                return '<span class="label label-sm label-success arrowed arrowed-right">Yes</span>';
+                            }
+                            return '<span class="label label-sm label-danger arrowed arrowed-right">No</span>';
+                        })
+                        ->addColumn('channel_representation', function ($query) {
+                            if ($query->campaign_channel == 'WHATSAPP') {
+                                return '<span style="background-color: #25D366 !important;" class="label label-sm arrowed arrowed-right">Whatsapp</span>';
+                            }
+                            return '<span style="background-color: #FF9900 !important;" class="label label-sm arrowed arrowed-right">SMS</span>';
+                        })
+                        ->rawColumns(['prefix_brand_code_representation', 'channel_representation'])
+                        ->make(true);
     }
 
-    public function campaign(Request $request, $campaign_hash = NULL)
-    {
+    public function campaign(Request $request, $campaign_hash = NULL) {
 
         if ($request->isMethod('post')) {
             $postArr = $request->except('_token');
@@ -80,8 +74,7 @@ class CampaignController extends Controller
         return view('frontend/campaigns/campaign', $dataArr);
     }
 
-    public function deleteCampaign(Request $request)
-    {
+    public function deleteCampaign(Request $request) {
         if (!empty($request->campaign_hash)) {
             try {
                 Campaign::where('campaign_hash', '=', $request->campaign_hash)->delete();
@@ -99,8 +92,7 @@ class CampaignController extends Controller
         }
     }
 
-    public function checkCampaignNameExists(Request $request)
-    {
+    public function checkCampaignNameExists(Request $request) {
         $campaign_name = $request->campaign_name;
         $campaign_hash = $request->campaign_hash;
         if (!empty($request->campaign_hash)) {
@@ -117,8 +109,7 @@ class CampaignController extends Controller
         }
     }
 
-    public function test_campaign(Request $request, $campaign_hash)
-    {
+    public function test_campaign(Request $request, $campaign_hash) {
         if ($request->isMethod('post')) {
             $campaignObj = Campaign::find(decodeId($campaign_hash));
             $brandObj = Brand::find(Auth::user()->brand_id);
@@ -165,8 +156,7 @@ class CampaignController extends Controller
         return view('frontend/campaigns/test_campaign', $dataArr);
     }
 
-    public function live_campaign(Request $request, $campaign_hash)
-    {
+    public function live_campaign(Request $request, $campaign_hash) {
         if ($request->isMethod('post')) {
             CronRequest::create(['list_id' => decodeId($request->list_hash), 'brand_id' => Auth::user()->brand_id, 'user_id' => Auth::user()->id, 'campaign_id' => decodeId($campaign_hash), 'message_type' => $request->message_type, 'type' => 'live', 'status' => CRON_JOB_QUEUED]);
             return redirect('campaigns/live_campaign/' . $campaign_hash)->with('live_messages_sent', 'Your Request is Queued Successfully! Please check deliveries to get more information.');
@@ -179,8 +169,7 @@ class CampaignController extends Controller
         return view('frontend/campaigns/live_campaign', $dataArr);
     }
 
-    public function duplicateCampaign($campaign_hash)
-    {
+    public function duplicateCampaign($campaign_hash) {
         $campaignArr = Campaign::find(decodeId($campaign_hash))->toArray();
         $newCampaignObj = new Campaign();
         $newCampaignObj->brand_id = $campaignArr['brand_id'];
@@ -194,4 +183,5 @@ class CampaignController extends Controller
         $newCampaignObj->save();
         return redirect()->back()->with('success', 'Duplicate Campaign Created Successfully');
     }
+
 }

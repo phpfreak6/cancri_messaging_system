@@ -8,7 +8,7 @@
 <div class="login-logo"></div>
 <div class="login-box-body">
     <p class="login-box-msg">
-        <img src="<?= url('img/logo-login.png'); ?>" style="height: 60px;">
+        <img src="<?= url('img/logo-login.png'); ?>" style="height: 90px;">
     </p>
     <?php echo Form::open(array('class' => '', 'url' => '/admin', 'method' => 'post', 'id' => 'login_form', 'role' => 'form')); ?>
     <div class="form-group has-feedback">

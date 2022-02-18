@@ -1,15 +1,15 @@
 @extends('layouts/frontend_login_layout')
 @section('content')
 <style>
-    .help-block{
-        color:#d16e6c !important;
+    .help-block {
+        color: #d16e6c !important;
     }
 </style>
 <div class="login-logo">
 </div>
 <div class="login-box-body">
     <p class="login-box-msg">
-        <img src="<?= url('img/logo-login.png'); ?>" style="height: 60px;">
+        <img src="<?= url('img/logo-login.png'); ?>" style="height: 160px;">
     </p>
     <?php echo Form::open(array('class' => '', 'url' => '/login', 'method' => 'post', 'id' => 'login_form', 'role' => 'form')); ?>
     <div class="form-group has-feedback">
@@ -32,13 +32,13 @@
         $('#login_form').validate({
             errorClass: "help-block",
             errorElement: "label",
-            highlight: function (element) {
+            highlight: function(element) {
                 $(element).closest('.form-group').addClass('has-error');
             },
-            unhighlight: function (element) {
+            unhighlight: function(element) {
                 $(element).closest('.form-group').removeClass('has-error');
             },
-            submitHandler: function (form) {
+            submitHandler: function(form) {
                 blockScreen();
                 form.submit();
             },
@@ -52,7 +52,7 @@
             }
         });
     }
-    $(document).ready(function () {
+    $(document).ready(function() {
         validateLoginForm();
     });
 </script>

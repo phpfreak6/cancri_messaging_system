@@ -13,40 +13,46 @@ use DB;
 /* Requests */
 use App\Http\Requests\AdminLoginUserRequest;
 
-class UserController extends MasterController {
+class UserController extends MasterController
+{
 
     protected $User_model;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->User_model = new User();
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $dataArr['title'] = 'Manage Users';
         return view('admin/users/index', $dataArr);
     }
 
-    public function getUsersDatatable(Request $request) {
+    public function getUsersDatatable(Request $request)
+    {
         return datatables()->of(
-                                DB::table('users')
-                                ->leftJoin('brands', 'brands.id', '=', 'users.brand_id')
-                                ->select('users.id', 'users.email', 'users.first_name', 'users.last_name', 'users.admin', 'brands.brand_name')
-                                ->get())
-                        ->addIndexColumn()
-                        ->addColumn('full_name', function ($query) {
-                            return $query->first_name . ' ' . $query->last_name;
-                        })
-                        ->addColumn('type', function ($query) {
-                            if ($query->admin == 1) {
-                                return '<span class="label label-sm label-success arrowed arrowed-right">Admin</span>';
-                            }
-                            return '<span class="label label-sm label-primary arrowed arrowed-right">User</span>';
-                        })
-                        ->rawColumns(['type'])
-                        ->make(true);
+            DB::table('users')
+                ->leftJoin('brands', 'brands.id', '=', 'users.brand_id')
+                ->select('users.id', 'users.email', 'users.first_name', 'users.last_name', 'users.admin', 'brands.brand_name')
+                ->get()
+        )
+            ->addIndexColumn()
+            ->addColumn('full_name', function ($query) {
+                return $query->first_name . ' ' . $query->last_name;
+            })
+            ->addColumn('type', function ($query) {
+                if ($query->admin == 1) {
+                    return '<span class="label label-sm label-success arrowed arrowed-right">Admin</span>';
+                }
+                return '<span class="label label-sm label-primary arrowed arrowed-right">User</span>';
+            })
+            ->rawColumns(['type'])
+            ->make(true);
     }
 
-    public function user(Request $request, $user_id = NULL) {
+    public function user(Request $request, $user_id = NULL)
+    {
         if ($request->isMethod('post')) {
             $postArr = $request->except('_token');
             $postArr['admin'] = !empty($postArr['admin']) ? $postArr['admin'] : 0;
@@ -72,42 +78,48 @@ class UserController extends MasterController {
         return view('admin/users/user', $dataArr);
     }
 
-    public function dashboard() {
+    public function dashboard()
+    {
         $dataArr['title'] = 'Admin Dashboard'; // Set Title
         return view('admin/admin_users/dashboard', $dataArr);
     }
 
-    public function login() {
+    public function login()
+    {
         $dataArr['title'] = 'Admin Login'; // Set Page Title
         return view('admin/admin_users/login', $dataArr);
     }
 
-    public function checkUserlogin(AdminLoginUserRequest $request) {
+    public function checkUserlogin(AdminLoginUserRequest $request)
+    {
         $dataArr = $request->validated();
         if (Auth::attempt(['email' => $dataArr['email'], 'password' => $dataArr['password']])) {
             return redirect('/admin/dashboard')->with('success', 'Welcome');
         }
-        return redirect('/admin')->with('error', 'Incorrect credentials');
+        return redirect('/login')->with('error', 'Incorrect credentials');
     }
 
-    public function logout() {
+    public function logout()
+    {
         Auth::logout();
-        return redirect('/admin')->with('success', 'Logout successfully');
+        return redirect('/login')->with('success', 'Logout successfully');
     }
 
-    public function changePassword(Request $request) {
+    public function changePassword(Request $request)
+    {
         if ($request->isMethod('post')) {
             $user = $this->User_model::where('email', auth()->user()->email)->first();
             $user->password = Hash::make($request->new_password);
             $user->save();
             Auth::logout();
-            return redirect('/admin')->with('success', 'Password changed successfully! Please login again.');
+            return redirect('/login')->with('success', 'Password changed successfully! Please login again.');
         }
         $dataArr['title'] = 'Change Password';
         return view('admin/admin_users/change_password', $dataArr);
     }
 
-    public function checkEmailExists(Request $request) {
+    public function checkEmailExists(Request $request)
+    {
         $email = $request->email;
         $id = $request->id;
         if (!empty($request->id)) {
@@ -124,7 +136,8 @@ class UserController extends MasterController {
         }
     }
 
-    public function deleteUser(Request $request) {
+    public function deleteUser(Request $request)
+    {
         if (!empty(User::where('id', '=', $request->id)->delete())) {
             echo '1';
             die;
@@ -133,5 +146,4 @@ class UserController extends MasterController {
             die;
         }
     }
-
 }
