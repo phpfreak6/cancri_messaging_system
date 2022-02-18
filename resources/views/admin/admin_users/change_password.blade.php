@@ -38,10 +38,10 @@
         $('#change_password_form').validate({
             errorClass: "help-block",
             errorElement: "label",
-            highlight: function (element) {
+            highlight: function(element) {
                 $(element).closest('.form-group').addClass('has-error');
             },
-            unhighlight: function (element) {
+            unhighlight: function(element) {
                 $(element).closest('.form-group').removeClass('has-error');
             },
             rules: {
@@ -49,16 +49,18 @@
                 confirm_password: {
                     equalTo: "#new_password"
                 }
-            }, messages: {
+            },
+            messages: {
                 new_password: "Enter new password",
                 confirm_password: {
                     required: "Please confirm your new password",
                     equalTo: "Password did not match"
                 }
-            }});
+            }
+        });
     }
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         validateChangePasswordForm();
     });
 </script>
