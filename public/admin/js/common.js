@@ -37,7 +37,7 @@ function blockScreen() {
             backgroundColor: 'transparent',
             border: 'none'
         },
-        message: '<i style="font-size:80px;color:#000080;" class="ace-icon fa fa-spinner fa-spin"></i>',
+        message: '<i style="font-size:80px;color:#004458;" class="ace-icon fa fa-spinner fa-spin"></i>',
         baseZ: 1500,
         overlayCSS: {
             backgroundColor: '#FFFFFF',
