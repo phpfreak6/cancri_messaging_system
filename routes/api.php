@@ -1,15 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
+## Facades
+use Illuminate\Support\Facades\Route;
 
-Route::post('/setDeliveryReport', 'DeliveryClickController@setDeliveryReport');
+## Controllers
+use App\Http\Controllers\DeliveryClickController;
+use App\Http\Controllers\WebHookController;
 
+Route::post('setDeliveryReport', [DeliveryClickController::class, 'setDeliveryReport']);
 
-/* Twilio SMS Messages Webhooks */
-Route::post('/webhooks/smsMessageStatusHook', 'WebHookController@smsMessageStatusHook');
-
-
-
-Route::post('/webhooks/whatsappMessageStatusHook', 'WebHookController@whatsappMessageStatusHook');
-Route::post('/webhooks/receiveMessageWebhook', 'WebHookController@receiveMessageWebhook');
-
+Route::post('webhooks/smsMessageStatusHook', [WebHookController::class, 'smsMessageStatusHook']);
+Route::post('webhooks/whatsappMessageStatusHook', [WebHookController::class, 'whatsappMessageStatusHook']);
+Route::post('webhooks/receiveMessageWebhook', [WebHookController::class, 'receiveMessageWebhook']);

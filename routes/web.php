@@ -9,6 +9,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DeliveryClickController;
+use App\Http\Controllers\IncomingMessageController;
+use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 ## Admin Controllers
 use App\Http\Controllers\admin\UserController as AdminUserController;
@@ -101,22 +104,24 @@ Route::group(['middleware' => 'user'], function () {
     Route::group(['prefix' => 'deliveries'], function () {
         Route::get('index', [DeliveryController::class, 'index']);
         Route::post('getDeliveriesDatatable',  [DeliveryController::class, 'getDeliveriesDatatable']);
-        // Route::post('getDeliveriesDatatable', 'DeliveryController@getDeliveriesDatatable');
         Route::get('delivery_details/{delivery_hash}', [DeliveryController::class, 'delivery_details']);
-        // Route::get('delivery_details/{delivery_hash}', 'DeliveryController@delivery_details');
         Route::post('deleteDelivery', [DeliveryController::class, 'deleteDelivery']);
     });
 
     ## Manage Delivery Clicks
-    Route::get('/delivery_clicks/index', 'DeliveryClickController@index');
-    Route::post('/delivery_clicks/getDeliveryClicksDatatable', 'DeliveryClickController@getDeliveryClicksDatatable');
-    Route::post('/delivery_clicks/deleteDeliveryClick', 'DeliveryClickController@deleteDeliveryClick');
+    Route::group(['prefix' => 'delivery_clicks'], function () {
+        Route::get('index', [DeliveryClickController::class, 'index']);
+        Route::post('getDeliveryClicksDatatable', [DeliveryClickController::class, 'getDeliveryClicksDatatable']);
+        Route::post('deleteDeliveryClick', [DeliveryClickController::class, 'deleteDeliveryClick']);
+    });
 
     ## Incoming Messages Listing
-    Route::get('incoming-messages/index', 'IncomingMessageController@index');
-    Route::post('incoming-messages/getIncomingMessagesDatatable', 'IncomingMessageController@getIncomingMessagesDatatable');
-    Route::get('incoming-messages/incoming-message-detail/{incoming_message_id}', 'IncomingMessageController@viewMessageDetail');
+    Route::group(['prefix' => 'incoming-messages'], function () {
+        Route::get('index', [IncomingMessageController::class, 'index']);
+        Route::post('getIncomingMessagesDatatable', [IncomingMessageController::class, 'getIncomingMessagesDatatable']);
+        Route::get('incoming-message-detail/{incoming_message_id}', [IncomingMessageController::class, 'viewMessageDetail']);
+    });
 });
 
-Route::get('/testing_whatsapp', 'CampaignController@testing_whatsapp');
-Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+Route::get('testing_whatsapp', [CampaignController::class, 'testing_whatsapp']);
+Route::get('logs', [LogViewerController::class, 'index']);
